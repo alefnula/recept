@@ -1,0 +1,16 @@
+.coverage
+.idea
+.vscode
+.pytest_cache/
+*.py[cod]
+recept.egg-info/
+
+
+# Experimentation Jupyter notebooks
+.ipynb_checkpoints
+*.ipynb
+
+
+# Build
+_build
+docs/_build
