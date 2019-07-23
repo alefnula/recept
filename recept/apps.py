@@ -29,6 +29,7 @@ umount = app("umount", "-f")
 
 # Python commands
 python = app(sys.executable)
+pip = app("pip")
 pytest = app("py.test", "-s", _tee=False, _ok_code=[0, 1, 2, 3, 4, 5])
 black = app("black")
 flake8 = app("flake8", _ok_code=[0, 1])
