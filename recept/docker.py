@@ -151,17 +151,17 @@ def start(
     # Add env
     if env is not None:
         for key, value in env.items():
-            run_command.extend(["--env", f'"{key}={value}"'])
+            run_command.extend(["--env", f'{key}="{value}"'])
 
     # Add ports
     if ports is not None:
         for key, value in ports.items():
-            run_command.extend(["--publish", f'"{key}:{value}"'])
+            run_command.extend(["--publish", f"{key}:{value}"])
 
     # Add volumes
     if volumes is not None:
         for key, value in volumes.items():
-            run_command.extend(["--volume", f'"{key}:{value}"'])
+            run_command.extend(["--volume", f'"{key}":"{value}"'])
 
     # Add networks
     if networks is not None:

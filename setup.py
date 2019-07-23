@@ -2,7 +2,7 @@ import io
 from setuptools import setup, find_packages
 
 
-version = "0.0.1"
+version = "0.0.3"
 author = "Viktor Kerkez"
 author_email = "alefnula@gmail.com"
 url = "https://github.com/alefnula/recept"
@@ -10,7 +10,7 @@ url = "https://github.com/alefnula/recept"
 
 setup(
     name="recept",
-    version="0.0.2",
+    version=version,
     author=author,
     author_email=author_email,
     maintainer=author,

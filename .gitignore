@@ -12,5 +12,7 @@ recept.egg-info/
 
 
 # Build
+build
+dist
 _build
 docs/_build
