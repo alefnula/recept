@@ -10,7 +10,7 @@ url = "https://github.com/alefnula/recept"
 
 setup(
     name="recept",
-    version="0.0.1",
+    version="0.0.2",
     author=author,
     author_email=author_email,
     maintainer=author,

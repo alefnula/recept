@@ -1,5 +1,5 @@
-__all__ = ["apps", "Config"]
+__all__ = ["register", "Config"]
 
 
-from recept import apps
+from recept.cli import register
 from recept.config import Config
