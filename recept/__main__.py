@@ -49,7 +49,13 @@ def main():
             print_help_and_exit(f"Recipes folder not found: {recipes}")
         # If it exists add it's parent folder to PYTHONPATH
         sys.path.insert(0, os.path.dirname(recipes))
-        sys.argv[:] = rest
+        sys.argv[1:] = rest
+    else:
+        # Add current working directory to the pythonpath if it's not already
+        # added.
+        cwd = os.getcwd()
+        if cwd not in sys.path:
+            sys.path.insert(0, cwd)
 
     # Try to import recipes
     try:
