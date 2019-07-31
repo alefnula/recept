@@ -13,7 +13,7 @@ import json
 import logging
 from pathlib import Path
 from copy import deepcopy
-from typing import Callable, Any, Optional
+from typing import Callable, Any, Optional, Dict
 from urllib.parse import urlparse, ParseResult as UrlParseResult
 
 from recept.errors import ImproperlyConfigured
@@ -267,8 +267,6 @@ class ToEnvMixin:
         }
     """
 
-    __TYPES = (str, bytes, bool, int, float)
-
     # If env_prefix is None a snake case version of a class name will be used.
     env_prefix = None
 
@@ -277,45 +275,59 @@ class ToEnvMixin:
     # attributes.
     env_attrs = None
 
-    __FIRST_CAP_RE = re.compile("(.)([A-Z][a-z]+)")
-    __ALL_CAP_RE = re.compile("([a-z0-9])([A-Z])")
+    __FIRST_CAP_RE = re.compile(r"(.)([A-Z][a-z]+)")
+    __ALL_CAP_RE = re.compile(r"([a-z0-9])([A-Z])")
+    __FORBIDDEN_CHARS_RE = re.compile(r"[^\w]+")
 
     @classmethod
-    def __camel_case_to_snake_case(cls, name):
-        """Convert camel case to snake case."""
-        s1 = cls.__FIRST_CAP_RE.sub(r"\1_\2", name)
-        return cls.__ALL_CAP_RE.sub(r"\1_\2", s1).lower()
+    def __types(cls):
+        return str, bytes, bool, int, float, ToEnvMixin
 
-    @staticmethod
-    def __value_to_str(value):
-        if isinstance(value, str):
-            return value
-        elif isinstance(value, bool):
-            return "true" if value else "false"
-        elif isinstance(value, bytes):
-            return str(value, encoding="utf-8")
+    @classmethod
+    def __camel_case_to_snake_case(cls, s: str) -> str:
+        """Convert camel case to snake case."""
+        s1 = cls.__FORBIDDEN_CHARS_RE.sub("_", s)
+        s2 = cls.__FIRST_CAP_RE.sub(r"\1_\2", s1)
+        return cls.__ALL_CAP_RE.sub(r"\1_\2", s2).lower()
+
+    def __get_env(self, prefix: str, attr: str) -> Dict[str, str]:
+        obj = getattr(self, attr)
+
+        if isinstance(obj, ToEnvMixin):
+            return obj.to_env()
+
+        key = (
+            attr.upper()
+            if prefix.strip() == ""
+            else f"{prefix}_{attr}".upper()
+        )
+        if isinstance(obj, str):
+            return {key: obj}
+        elif isinstance(obj, bool):
+            return {key: "true" if obj else "false"}
+        elif isinstance(obj, bytes):
+            return {key: str(obj, encoding="utf-8")}
         else:
-            return str(value)
+            return {key: str(obj)}
 
     def to_env(self) -> dict:
         """Returns this class variables in env format dictionary."""
-        if self.__class__.env_prefix is None:
-            prefix = self.__camel_case_to_snake_case(self.__class__.__name__)
-        else:
-            prefix = self.__class__.env_prefix
+        prefix = self.__camel_case_to_snake_case(
+            self.__class__.__name__
+            if self.__class__.env_prefix is None
+            else self.__class__.env_prefix
+        )
 
         if self.__class__.env_attrs is None:
             env_attrs = [
                 key
                 for key, value in self.__dict__.items()
-                if not isinstance(value, self.__TYPES)
+                if isinstance(value, self.__types())
             ]
         else:
             env_attrs = self.__class__.env_attrs
 
-        return {
-            f"{prefix}_{attr}".upper(): self.__value_to_str(
-                getattr(self, attr)
-            )
-            for attr in env_attrs
-        }
+        env = {}
+        for attr in env_attrs:
+            env.update(self.__get_env(prefix=prefix, attr=attr))
+        return env

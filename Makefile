@@ -25,7 +25,7 @@ clean:               ## Cleanup the project
 
 
 test:                ## Run tests and code checks.
-	@py.test -v --cov "$(PROJECT)" "$(PROJECT)"
+	@py.test -vv --cov "$(PROJECT)" "$(PROJECT)"
 
 
 
