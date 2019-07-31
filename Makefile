@@ -20,8 +20,8 @@ release: build       ## Build and upload the package to PyPI.
 clean:               ## Cleanup the project
 	@find . -type d -name __pycache__ -delete
 	@find . -type f -name "*.py[cod]" -delete
-	@rm -fr build dist
-
+	@rm -fr .coverage .pytest_cache
+	@rm -fr build dist recept.egg-info
 
 
 test:                ## Run tests and code checks.
