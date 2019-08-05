@@ -88,7 +88,9 @@ def is_running(name: str):
         name: Name of the running container.
     """
     r = docker.ps("--filter", f"name={name}", "--format", "{{.Names}}")
-    return f"{name}" == r.stdout.decode("utf-8").strip()
+    return f"{name}" in {
+        line.strip() for line in r.stdout.decode("utf-8").splitlines()
+    }
 
 
 def create_network(network: str):
