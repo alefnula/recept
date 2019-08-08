@@ -1,8 +1,7 @@
 import io
 from setuptools import setup, find_packages
+from recept.version import __version__
 
-
-version = "0.0.8"
 author = "Viktor Kerkez"
 author_email = "alefnula@gmail.com"
 url = "https://github.com/alefnula/recept"
@@ -10,7 +9,7 @@ url = "https://github.com/alefnula/recept"
 
 setup(
     name="recept",
-    version=version,
+    version=__version__,
     author=author,
     author_email=author_email,
     maintainer=author,
