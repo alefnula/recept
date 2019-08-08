@@ -281,7 +281,7 @@ class ToEnvMixin:
 
     @classmethod
     def __types(cls):
-        return str, bytes, bool, int, float, ToEnvMixin
+        return str, bytes, bool, int, float, Path, ToEnvMixin
 
     @classmethod
     def __camel_case_to_snake_case(cls, s: str) -> str:
