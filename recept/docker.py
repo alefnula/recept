@@ -44,7 +44,15 @@ def build(
 
     """
 
-    docker.build("--file", dockerfile, "--tag", f"{image}:{tag}", build_dir)
+    docker.build(
+        "--file",
+        dockerfile,
+        "--tag",
+        f"{image}:{tag}",
+        "--network",
+        "host",
+        build_dir,
+    )
     if latest and tag != "latest":
         docker.tag(f"{image}:{tag}", f"{image}:latest")
 
