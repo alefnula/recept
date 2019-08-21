@@ -8,7 +8,6 @@ dictionary from class attributes.
 __all__ = ["Env", "ToEnvMixin"]
 
 import os
-import re
 import json
 import logging
 from pathlib import Path
@@ -17,6 +16,7 @@ from typing import Callable, Any, Optional, Dict
 from urllib.parse import urlparse, ParseResult as UrlParseResult
 
 from recept.errors import ImproperlyConfigured
+from recept.utils import camel_case_to_snake_case
 
 
 logger = logging.getLogger(__name__)
@@ -275,20 +275,9 @@ class ToEnvMixin:
     # attributes.
     env_attrs = None
 
-    __FIRST_CAP_RE = re.compile(r"(.)([A-Z][a-z]+)")
-    __ALL_CAP_RE = re.compile(r"([a-z0-9])([A-Z])")
-    __FORBIDDEN_CHARS_RE = re.compile(r"[^\w]+")
-
     @classmethod
     def __types(cls):
         return str, bytes, bool, int, float, Path, ToEnvMixin
-
-    @classmethod
-    def __camel_case_to_snake_case(cls, s: str) -> str:
-        """Convert camel case to snake case."""
-        s1 = cls.__FORBIDDEN_CHARS_RE.sub("_", s)
-        s2 = cls.__FIRST_CAP_RE.sub(r"\1_\2", s1)
-        return cls.__ALL_CAP_RE.sub(r"\1_\2", s2).lower()
 
     def __get_env(self, prefix: str, attr: str) -> Dict[str, str]:
         obj = getattr(self, attr)
@@ -312,7 +301,7 @@ class ToEnvMixin:
 
     def to_env(self) -> dict:
         """Returns this class variables in env format dictionary."""
-        prefix = self.__camel_case_to_snake_case(
+        prefix = camel_case_to_snake_case(
             self.__class__.__name__
             if self.__class__.env_prefix is None
             else self.__class__.env_prefix

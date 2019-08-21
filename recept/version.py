@@ -11,5 +11,5 @@ class Version:
         return f"{self.major}.{self.minor}.{self.build}"
 
 
-version = Version(0, 0, 9)
+version = Version(0, 0, 10)
 __version__ = str(version)
