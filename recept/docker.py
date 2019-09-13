@@ -1,4 +1,4 @@
-from typing import List, Dict, Optional
+from typing import List, Dict, Optional, Union
 
 import click
 
@@ -44,7 +44,15 @@ def build(
 
     """
 
-    docker.build("--file", dockerfile, "--tag", f"{image}:{tag}", build_dir)
+    docker.build(
+        "--file",
+        dockerfile,
+        "--tag",
+        f"{image}:{tag}",
+        "--network",
+        "host",
+        build_dir,
+    )
     if latest and tag != "latest":
         docker.tag(f"{image}:{tag}", f"{image}:latest")
 
@@ -88,7 +96,9 @@ def is_running(name: str):
         name: Name of the running container.
     """
     r = docker.ps("--filter", f"name={name}", "--format", "{{.Names}}")
-    return f"{name}" == r.stdout.decode("utf-8").strip()
+    return f"{name}" in {
+        line.strip() for line in r.stdout.decode("utf-8").splitlines()
+    }
 
 
 def create_network(network: str):
@@ -110,10 +120,12 @@ def start(
     image: str = None,
     tag: str = "latest",
     env: Optional[Dict[str, str]] = None,
-    ports: Optional[Dict[str, str]] = None,
+    ports: Optional[Dict[int, int]] = None,
     volumes: Optional[Dict[str, str]] = None,
     networks: Optional[List[str]] = None,
-    command: Optional[str] = None,
+    command: Optional[Union[str, List[str]]] = None,
+    entrypoint: Optional[str] = None,
+    interactive: bool = False,
 ):
     """Start a container.
 
@@ -130,38 +142,38 @@ def start(
             attached as volumes.
         networks: List of network names that the container should have access.
         command: Override of the default entrypoint of the container.
+        entrypoint: Override of the default entrypoint.
+        interactive: Should the container be started in interactive mode. If
+            False, the container (or command) will be started in detached mode.
     """
     if is_running(name):
         click.secho(f"{name} is already running.", fg="red")
         return
 
-    if command is None:
-        run_command = ["--detach", "--tty", "--rm", "--name", name]
+    if interactive:
+        docker_app = docker.bake(_fg=True)
+        run_command = ["--interactive", "--tty", "--rm", "--name", name]
     else:
-        run_command = [
-            "--interactive",
-            "--tty",
-            "--rm",
-            "--entrypoint",
-            command,
-            "--name",
-            name,
-        ]
+        docker_app = docker
+        run_command = ["--detach", "--tty", "--rm", "--name", name]
+
+    if entrypoint is not None:
+        run_command.extend(["--entrypoint", entrypoint])
 
     # Add env
     if env is not None:
         for key, value in env.items():
-            run_command.extend(["--env", f'"{key}={value}"'])
+            run_command.extend(["--env", f"{key}={value}"])
 
     # Add ports
     if ports is not None:
         for key, value in ports.items():
-            run_command.extend(["--publish", f'"{key}:{value}"'])
+            run_command.extend(["--publish", f"{key}:{value}"])
 
     # Add volumes
     if volumes is not None:
         for key, value in volumes.items():
-            run_command.extend(["--volume", f'"{key}:{value}"'])
+            run_command.extend(["--volume", f"{key}:{value}"])
 
     # Add networks
     if networks is not None:
@@ -173,9 +185,11 @@ def start(
     run_command.append(f"{image}:{tag}")
 
     if command is None:
-        docker.run(*run_command)
+        docker_app.run(*run_command)
     else:
-        docker.bake(_fg=True).run(*run_command)
+        if isinstance(command, str):
+            command = [command]
+        docker_app.run(*run_command, *command)
 
 
 def stop(name: str):
