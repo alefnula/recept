@@ -5,7 +5,7 @@ import click
 from recept.apps import docker
 
 
-def login(username: str, password: str, registry: str):
+def login(username: str, password: str, registry: Optional[str] = None):
     """Login to docker registry.
 
     Args:
@@ -13,9 +13,10 @@ def login(username: str, password: str, registry: str):
         password: Password.
         registry: Url to the docker registry.
     """
-    return docker.login(
-        "--username", username, "--password", password, registry
+    args = ["--username", username, "--password", password, registry] + (
+        [registry] if registry is not None else []
     )
+    return docker.login(*args)
 
 
 def remove_dangling_images():
