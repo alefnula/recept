@@ -13,7 +13,7 @@ def login(username: str, password: str, registry: Optional[str] = None):
         password: Password.
         registry: Url to the docker registry.
     """
-    args = ["--username", username, "--password", password, registry] + (
+    args = ["--username", username, "--password", password] + (
         [registry] if registry is not None else []
     )
     return docker.login(*args)
