@@ -1,9 +1,16 @@
 """Python project helpers."""
 
-import tsh
 import click
 
-from recept.apps import rm, find, black, flake8, pydocstyle, pytest
+from recept.apps.shell import (
+    pushd,
+    rm,
+    find,
+    black,
+    flake8,
+    pydocstyle,
+    pytest,
+)
 
 
 def clean(path: str):
@@ -12,7 +19,7 @@ def clean(path: str):
     Args:
         path: Path to the project directory.
     """
-    with tsh.pushd(path):
+    with pushd(path):
         # Delete the __pycache__ directories
         r = find(".", "-type", "d", "-name", "__pycache__")
         for path in r.stdout.decode("utf-8").splitlines():

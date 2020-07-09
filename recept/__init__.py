@@ -1,4 +1,5 @@
 __all__ = [
+    "apps",
     "register",
     "Config",
     "c",
@@ -21,6 +22,7 @@ __all__ = [
 
 import click
 
+from recept import apps
 from recept.cli import register
 from recept.config import Config
 from recept.termui import Color, echo, exit

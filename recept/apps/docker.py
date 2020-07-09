@@ -2,7 +2,7 @@ from typing import List, Dict, Optional, Union
 
 import click
 
-from recept.apps import docker
+from recept.apps.shell import docker
 
 
 def login(username: str, password: str, registry: Optional[str] = None):
